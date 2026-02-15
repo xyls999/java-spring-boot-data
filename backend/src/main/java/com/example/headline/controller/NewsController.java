@@ -5,9 +5,12 @@ import com.example.headline.entity.News;
 import com.example.headline.service.NewsService;
 import com.example.headline.util.UserContext;
 import com.example.headline.vo.ApiResponse;
+import com.example.headline.vo.NewsRankVO;
 import com.example.headline.vo.PageResult;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/news")
@@ -26,8 +29,15 @@ public class NewsController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<News> detail(@PathVariable Long id) {
-        return ApiResponse.success(newsService.getById(id));
+    public ApiResponse<News> detail(@PathVariable Long id,
+                                    @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        return ApiResponse.success(newsService.getById(id, userId));
+    }
+
+    @GetMapping("/rank")
+    public ApiResponse<List<NewsRankVO>> rank(@RequestParam(defaultValue = "total") String period,
+                                              @RequestParam(defaultValue = "10") int limit) {
+        return ApiResponse.success(newsService.rank(period, limit));
     }
 
     @PostMapping("/manage")

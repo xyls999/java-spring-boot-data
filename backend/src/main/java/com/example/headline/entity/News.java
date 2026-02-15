@@ -13,6 +13,7 @@ public class News {
     private String title;
     private String content;
     private Long authorId;
+    private Long heatScore;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -24,6 +25,8 @@ public class News {
     public void setContent(String content) { this.content = content; }
     public Long getAuthorId() { return authorId; }
     public void setAuthorId(Long authorId) { this.authorId = authorId; }
+    public Long getHeatScore() { return heatScore; }
+    public void setHeatScore(Long heatScore) { this.heatScore = heatScore; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
