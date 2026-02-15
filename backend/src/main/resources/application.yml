@@ -1,0 +1,24 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/headline_db?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+      username: root
+      password: 123456
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      id-type: auto
+
+app:
+  jwt:
+    secret: change-this-secret-to-at-least-32-bytes-long-key
+    expire-ms: 86400000
