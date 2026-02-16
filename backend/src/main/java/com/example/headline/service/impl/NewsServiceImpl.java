@@ -4,11 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.headline.dto.NewsRequest;
 import com.example.headline.entity.News;
-import com.example.headline.entity.NewsView;
 import com.example.headline.exception.BizException;
 import com.example.headline.mapper.NewsMapper;
-import com.example.headline.mapper.NewsViewMapper;
+import com.example.headline.service.HeatAsyncService;
 import com.example.headline.service.NewsService;
+import com.example.headline.service.RankCacheService;
 import com.example.headline.vo.NewsRankVO;
 import com.example.headline.vo.PageResult;
 import org.springframework.stereotype.Service;
@@ -19,11 +19,15 @@ import java.util.List;
 @Service
 public class NewsServiceImpl implements NewsService {
     private final NewsMapper newsMapper;
-    private final NewsViewMapper newsViewMapper;
+    private final HeatAsyncService heatAsyncService;
+    private final RankCacheService rankCacheService;
 
-    public NewsServiceImpl(NewsMapper newsMapper, NewsViewMapper newsViewMapper) {
+    public NewsServiceImpl(NewsMapper newsMapper,
+                           HeatAsyncService heatAsyncService,
+                           RankCacheService rankCacheService) {
         this.newsMapper = newsMapper;
-        this.newsViewMapper = newsViewMapper;
+        this.heatAsyncService = heatAsyncService;
+        this.rankCacheService = rankCacheService;
     }
 
     @Override
@@ -37,18 +41,8 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public News getById(Long id, Long userId) {
-        News news = newsMapper.selectById(id);
-        if (news == null) {
-            throw new BizException("新闻不存在");
-        }
-        news.setHeatScore((news.getHeatScore() == null ? 0 : news.getHeatScore()) + 1);
-        newsMapper.updateById(news);
-
-        NewsView log = new NewsView();
-        log.setNewsId(id);
-        log.setUserId(userId);
-        log.setViewedAt(LocalDateTime.now());
-        newsViewMapper.insert(log);
+        News news = baseGetById(id);
+        heatAsyncService.increaseHeatAndLog(id, userId);
         return news;
     }
 
@@ -89,13 +83,7 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public List<NewsRankVO> rank(String period, int limit) {
-        if ("day".equalsIgnoreCase(period)) {
-            return newsMapper.timedRank(LocalDateTime.now().minusDays(1), limit);
-        }
-        if ("week".equalsIgnoreCase(period)) {
-            return newsMapper.timedRank(LocalDateTime.now().minusWeeks(1), limit);
-        }
-        return newsMapper.totalRank(limit);
+        return rankCacheService.getRank(period, limit);
     }
 
     private News baseGetById(Long id) {

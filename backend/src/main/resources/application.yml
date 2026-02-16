@@ -1,6 +1,12 @@
 server:
   port: 8080
+  tomcat:
+    threads:
+      max: 300
+      min-spare: 20
 spring:
+  application:
+    name: micro-headline
   datasource:
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
@@ -19,6 +25,14 @@ mybatis-plus:
       id-type: auto
 
 app:
+  node-id: ${HOSTNAME:single-node}
   jwt:
     secret: change-this-secret-to-at-least-32-bytes-long-key
     expire-ms: 86400000
+  rank:
+    refresh-ms: 60000
+  thread:
+    heat:
+      core: 4
+      max: 8
+      queue: 200
