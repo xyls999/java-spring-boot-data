@@ -14,6 +14,8 @@
 - **线程池可配置**：`app.thread.heat.*` 支持核心线程、最大线程、队列长度配置。
 - **分布式排行榜刷新锁**：使用 MySQL `GET_LOCK/RELEASE_LOCK`，在多实例部署时仅允许一个节点执行定时刷新，避免重复刷新风暴。
 - **节点识别接口**：`GET /api/system/node` 用于识别当前服务节点，便于多节点排障。
+- **并发安全优化**：热度递增改为数据库原子 `heat_score = heat_score + 1`，避免多线程丢计数。
+- **鲁棒性优化**：排行榜缓存预热/刷新失败不会阻塞主业务请求，接口可按需回源查询。
 
 ## 目录结构
 - `backend/`：Spring Boot 3 + MyBatis-Plus + Druid + MySQL8

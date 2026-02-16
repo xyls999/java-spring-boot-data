@@ -23,18 +23,19 @@ public class RankCacheServiceImpl implements RankCacheService {
     public RankCacheServiceImpl(NewsMapper newsMapper, SystemMapper systemMapper) {
         this.newsMapper = newsMapper;
         this.systemMapper = systemMapper;
-        warmUp();
+        warmUpSafely();
     }
 
     @Override
     public List<NewsRankVO> getRank(String period, int limit) {
+        int safeLimit = Math.max(1, limit);
         String safePeriod = normalizePeriod(period);
         List<NewsRankVO> cached = rankCache.get(safePeriod);
         if (cached == null || cached.isEmpty()) {
-            cached = queryRank(safePeriod, Math.max(limit, 10));
+            cached = queryRank(safePeriod, Math.max(safeLimit, 10));
             rankCache.put(safePeriod, cached);
         }
-        return cached.stream().limit(limit).toList();
+        return cached.stream().limit(safeLimit).toList();
     }
 
     @Override
@@ -45,16 +46,20 @@ public class RankCacheServiceImpl implements RankCacheService {
             return;
         }
         try {
-            warmUp();
+            warmUpSafely();
         } finally {
             systemMapper.releaseLock(LOCK_KEY);
         }
     }
 
-    private void warmUp() {
-        rankCache.put("total", queryRank("total", 20));
-        rankCache.put("day", queryRank("day", 20));
-        rankCache.put("week", queryRank("week", 20));
+    private void warmUpSafely() {
+        try {
+            rankCache.put("total", queryRank("total", 20));
+            rankCache.put("day", queryRank("day", 20));
+            rankCache.put("week", queryRank("week", 20));
+        } catch (Exception ignored) {
+            // 避免初始化或定时刷新异常导致主流程不可用
+        }
     }
 
     private List<NewsRankVO> queryRank(String period, int limit) {

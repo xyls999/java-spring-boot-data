@@ -5,6 +5,7 @@ import com.example.headline.entity.News;
 import com.example.headline.vo.NewsRankVO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,4 +31,7 @@ public interface NewsMapper extends BaseMapper<News> {
             LIMIT #{limit}
             """)
     List<NewsRankVO> timedRank(@Param("startTime") LocalDateTime startTime, @Param("limit") int limit);
+
+    @Update("UPDATE news SET heat_score = heat_score + 1 WHERE id = #{newsId}")
+    int increaseHeat(@Param("newsId") Long newsId);
 }

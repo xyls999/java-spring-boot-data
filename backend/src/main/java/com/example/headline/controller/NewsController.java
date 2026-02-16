@@ -29,9 +29,8 @@ public class NewsController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<News> detail(@PathVariable Long id,
-                                    @RequestHeader(value = "X-User-Id", required = false) Long userId) {
-        return ApiResponse.success(newsService.getById(id, userId));
+    public ApiResponse<News> detail(@PathVariable Long id) {
+        return ApiResponse.success(newsService.getById(id, null));
     }
 
     @GetMapping("/rank")
